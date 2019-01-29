@@ -24,4 +24,13 @@ class KolmogorovSpec extends WordSpec with Matchers {
     }
   }
 
+  "Average score" should {
+    "be higher for unusual URL" in {
+      val urlScore        = averageScore("/?max-keys=5000&prefix=AWSLogs%2F479626555249%2Fvpcflowlogs%2Feu-west-1%2F2018%2F12%2F&delimiter=%2F")
+      val paragraphScore  = averageScore(aChristmasCarol)
+      println(s"url score = $urlScore, paragraph score = $paragraphScore")
+      urlScore shouldBe > (paragraphScore)
+    }
+  }
+
 }

@@ -16,4 +16,6 @@ object Kolmogorov {
     compresser.deflate(output)
   }
 
+  def averageScore(x: String): Double = score(x).toDouble / x.length
+
 }
