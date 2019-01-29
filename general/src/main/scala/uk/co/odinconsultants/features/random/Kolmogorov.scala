@@ -1,6 +1,5 @@
 package uk.co.odinconsultants.features.random
 
-import java.util.zip.Deflater
 
 /**
   * See https://en.wikipedia.org/wiki/Kolmogorov_complexity
@@ -8,6 +7,7 @@ import java.util.zip.Deflater
 object Kolmogorov {
 
   def score(x: String): Int = {
+    import java.util.zip.Deflater
     val input = x.getBytes("UTF-8")
     val output = new Array[Byte](x.length)
     val compresser = new Deflater
