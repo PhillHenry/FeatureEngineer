@@ -9,7 +9,7 @@ object Kolmogorov {
 
   def score(x: String): Int = {
     val input = x.getBytes("UTF-8")
-    val output = new Array[Byte](100)
+    val output = new Array[Byte](x.length)
     val compresser = new Deflater
     compresser.setInput(input)
     compresser.finish()
