@@ -6,6 +6,10 @@ package uk.co.odinconsultants.features.random
   */
 object Kolmogorov {
 
+  /**
+    * "Kolmogorov complexity is not a computable function!"
+    * https://stackoverflow.com/questions/2979174/how-do-i-compute-the-approximate-entropy-of-a-bit-string/2979208
+    */
   def score(x: String): Int = {
     import java.util.zip.Deflater
     val input = x.getBytes("UTF-8")
