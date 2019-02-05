@@ -10,15 +10,20 @@ class CyclesSpec extends WordSpec with Matchers {
 
   val tolerance = 0.0001
 
-  "Monday morning and Sunday nigh" should {
+  def shouldBeSimilar(x: TimeAngle, y: TimeAngle): Unit = {
+    x._1 shouldBe y._1 +- tolerance
+    x._2 shouldBe y._2 +- tolerance
+  }
+
+  "Monday 00:00 and Sunday 23:59" should {
     val mondayMorning = LocalDateTime.of(2019, 2, 4, 0, 0)
     val sundayNight   = LocalDateTime.of(2019, 2, 3, 23, 59)
-    "should be close together" in {
-      val x = weekly(mondayMorning)
-      val y = weekly(sundayNight)
 
-      x._1 shouldBe y._1 +- tolerance
-      x._2 shouldBe y._2 +- tolerance
+    "be close together on an hourly cycle" in {
+      shouldBeSimilar(daily(mondayMorning), daily(sundayNight))
+    }
+    "be close together on a weekly cycle" in {
+      shouldBeSimilar(weekly(mondayMorning), weekly(sundayNight))
     }
   }
 

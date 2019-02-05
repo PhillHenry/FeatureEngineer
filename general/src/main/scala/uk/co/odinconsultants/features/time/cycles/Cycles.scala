@@ -24,12 +24,17 @@ object Cycles {
   val WEEK_MS:  Long        = DAY_MS * 7L
   val WEEK_2PI: Double      = (2 * math.Pi) / WEEK_MS
 
-  type TimeAngle = (Double, Double)
+  type TimeAngle            = (Double, Double)
 
-  def weekly(x: LocalDateTime): TimeAngle = {
-    val l         = x.toEpochSecond(TIMEZONE)
-    val msInWeek  = l % WEEK_MS
-    (math.sin(WEEK_2PI * msInWeek), math.cos(WEEK_2PI * msInWeek))
+  def daily(x: LocalDateTime): TimeAngle =
+    coordinates(x, DAY_MS)
+
+  def weekly(x: LocalDateTime): TimeAngle =
+    coordinates(x, WEEK_MS)
+
+  private def coordinates(x: LocalDateTime, mod: Long): TimeAngle = {
+    import math._
+    val modded = x.toEpochSecond(TIMEZONE) % mod
+    (sin(WEEK_2PI * modded), cos(WEEK_2PI * modded))
   }
-
 }
