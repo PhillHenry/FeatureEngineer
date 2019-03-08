@@ -13,9 +13,15 @@ class CountryLookupSpec extends WordSpec with Matchers {
     }
   }
 
-  "IPv6" should {
-    "gracefully handle IPv6" in {
+  "Bad lookups" should {
+    "be gracefully handle IPv6" in {
       CountryLookup("FE80:0000:0000:0000:0202:B3FF:FE1E:8329").isLeft shouldBe true
+    }
+  }
+
+  "IPv6" should {
+    "gracefully also be a possibility (results from ipstack.com)" in {
+      CountryLookup("2001:2b8:0000:0000:0202:B3FF:FE1E:8329") shouldBe Right("KR")
     }
   }
 

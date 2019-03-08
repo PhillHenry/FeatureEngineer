@@ -12,8 +12,6 @@ object CountryLookup {
 
   val reader = new Reader(inputStream, new CHMCache())
 
-  println(reader.getMetadata)
-
   /**
     * Returns the ISO code of the country to which this maps.
     */
