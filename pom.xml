@@ -6,6 +6,7 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>general</module>
+        <module>domain_ip</module>
     </modules>
     <name>${project.artifactId}</name>
   <description>Build feature vectors from data</description>
