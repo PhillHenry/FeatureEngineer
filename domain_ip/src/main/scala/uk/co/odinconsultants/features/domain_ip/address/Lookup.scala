@@ -11,7 +11,7 @@ object Lookup {
     new Reader(inputStream, new CHMCache())
   }
 
-  def tryLookup(fn: => String): Either[Throwable, String] = {
+  def tryLookup[T](fn: => T): Either[Throwable, T] = {
     Try { fn } match {
       case Success(x) => Right(x)
       case Failure(x) => Left(x)
