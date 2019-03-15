@@ -10,7 +10,7 @@ class EncodingsSpec extends WordSpec with Matchers {
   import Encodings._
 
   val domain: IndexedSeq[Char]  = ('0' to '9')
-  val space                     = Space[Char, Double](domain)
+  val space                     = Space[Char, Double](domain.toSet)
   val testString                = "123"
 
   "One hot encoding vectors" should {

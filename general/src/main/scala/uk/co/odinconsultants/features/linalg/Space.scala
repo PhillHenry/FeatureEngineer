@@ -2,7 +2,7 @@ package uk.co.odinconsultants.features.linalg
 
 import scala.reflect.ClassTag
 
-case class Space[T, U : Numeric : ClassTag](domain: IndexedSeq[T]) {
+case class Space[T, U : Numeric : ClassTag](domain: Set[T]) {
 
   val op: Numeric[U] = implicitly[Numeric[U]]
 
