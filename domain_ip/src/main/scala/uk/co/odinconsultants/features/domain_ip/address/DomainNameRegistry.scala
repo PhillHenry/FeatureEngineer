@@ -7,6 +7,7 @@ import java.util.Date
 import com.google.common.base.Optional
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.Try
 
 object DomainNameRegistry {
 
@@ -37,21 +38,22 @@ object DomainNameRegistry {
 
   def minorg(tlds: Seq[String]): Unit = {
     val domains = Seq(
-      "robomarkets.com",
-      "mx5.umu.se",
+//      "robomarkets.com",
+//      "mx5.umu.se",
       "mx5.qatarairways.com.qa",
-      "mx4.rcsecured.rcimx.net",
+//      "mx4.rcsecured.rcimx.net",
       "mx4.mk.de",
-      "mx4.hin.ch")
+      "mx4.hin.ch"
+    )
 
     domains.foreach { domain =>
       val (name, tld) = splitTLDs(domain, tlds)
       val lastDot     = name.lastIndexOf(".")
       val hostname    = if (lastDot == -1) name else name.substring(lastDot + 1)
       val cleaned     = s"$hostname$tld"
-      println(s"$hostname + $tld = $cleaned (name = $name, tld = $tld)")
+//      println(s"$hostname + $tld = $cleaned (name = $name, tld = $tld)")
       val optCreationDate = creationDateOf(cleaned) //
-      println(optCreationDate)
+      println(s"$domain: $optCreationDate")
     }
 
   }
@@ -70,14 +72,32 @@ object DomainNameRegistry {
   def longestToShortest(xs: Set[String]): Seq[String] =
     xs.toList.sortBy(- _.length)
 
-  private def creationDateOf(domain: String): Optional[Date] = {
+  private def creationDateOf(domain: String): Option[Date] = {
+    println(s"domain = $domain")
     import io.github.minorg.whoisclient.WhoisClient
     import org.thryft.native_.InternetDomainName
     val address         = InternetDomainName.from(domain)
-    val whoIsServer     = InetAddress.getByName("whois.verisign-grs.com")
-    val parser          = new WhoisClient()
-    val record          = parser.getWhoisRecord(address, whoIsServer)
-    val optCreationDate = record.getParsed.getCreationDate
-    optCreationDate
+    val whoIsServers    = Seq(
+      "whois.networksolutions.com",
+      "whois.verisign-grs.com",
+      "whois.godaddy.com",
+      "whois.denic.de",
+      "whois.your-server.de",
+      "whois.secura-gmbh.de",
+      "whois.rockenstein.de",
+      "whois.registrar.telekom.de",
+      "whois.cps-datensysteme.de")
+    val answers         = whoIsServers.flatMap { x =>
+      println(s"Querying: $x")
+      val whoIsServer     = InetAddress.getByName(x)
+      val parser          = new WhoisClient()
+      val optCreationDate = Try {
+        val record = parser.getWhoisRecord(address, whoIsServer)
+        println(record)
+        record.getParsed.getCreationDate
+      }.getOrElse(Optional.absent())
+      if (optCreationDate.isPresent) Some(optCreationDate.get) else None
+    }
+    answers.headOption
   }
 }
