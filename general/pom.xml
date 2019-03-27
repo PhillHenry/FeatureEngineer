@@ -11,5 +11,11 @@
 
     <artifactId>general</artifactId>
 
-
+    <dependencies>
+        <dependency>
+            <groupId>uk.co.odinconsultants</groupId>
+            <artifactId>smaths</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 </project>

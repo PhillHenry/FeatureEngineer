@@ -3,7 +3,7 @@ package uk.co.odinconsultants.features.data
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{Matchers, WordSpec}
-import uk.co.odinconsultants.features.data.NGrams.{NGramFn, Unigrams}
+import uk.co.odinconsultants.features.data.NGrams._
 
 @RunWith(classOf[JUnitRunner])
 class HistogramBuilderSpec extends WordSpec with Matchers {
@@ -11,7 +11,6 @@ class HistogramBuilderSpec extends WordSpec with Matchers {
   import HistogramBuilder._
 
   val text      = "abcde"
-  val CharUnigrams: String => Seq[String] = _.split("")
 
   "histogram of ngrams" should {
     "total correctly" in {
