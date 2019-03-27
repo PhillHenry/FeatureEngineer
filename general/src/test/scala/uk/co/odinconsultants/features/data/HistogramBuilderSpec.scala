@@ -29,12 +29,18 @@ class HistogramBuilderSpec extends WordSpec with Matchers {
 
   "Counts" should {
     val fn: String => Seq[String] = _.split("")
+
+    val extra       = text.head.toString
+    val nonUniform  = text.split("") :+ extra
     "total nGram occurrences" in {
-      val extra       = text.head.toString
-      val nonUniform  = text.split("") :+ extra
       val x2i         = histogramOf(nonUniform.toSeq, fn)
       x2i should have size text.length
       x2i(extra) shouldBe 2
+    }
+
+    "Be parallelizable" in {
+      val x2i         = histogramOf(nonUniform.toSeq.par, fn)
+      x2i should have size text.length
     }
   }
 
