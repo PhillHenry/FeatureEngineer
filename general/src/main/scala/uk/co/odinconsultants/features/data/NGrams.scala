@@ -12,13 +12,4 @@ object NGrams {
 
   def ngramsOf[T](n: Int, xs: Seq[T]): Seq[String] = xs.sliding(n).map(_.mkString("")).toSeq
 
-  def counts(xs: Seq[String]): Map[String, Int] = {
-    val x2i = collection.mutable.Map[String, Int]().withDefault(_ => 0)
-    xs.foldLeft(x2i) { case (acc, x) =>
-        x2i(x) = x2i(x) + 1
-        x2i
-    }
-    x2i.toMap
-  }
-
 }
