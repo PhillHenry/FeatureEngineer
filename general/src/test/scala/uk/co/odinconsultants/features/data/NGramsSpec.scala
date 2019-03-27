@@ -11,6 +11,16 @@ class NGramsSpec extends WordSpec with Matchers {
 
   val seq = "12345"
 
+  "Counts" should {
+    "total nGram occurrences" in {
+      val extra       = seq.head.toString
+      val nonUniform  = seq.split("") :+ extra
+      val x2i = counts(nonUniform.toSeq)
+      x2i should have size seq.length
+      x2i(extra) shouldBe 2
+    }
+  }
+
   s"bigrams of $seq" should {
     "have size n-1" in {
       ngramsOf(2, seq) should have size (seq.length - 1)
