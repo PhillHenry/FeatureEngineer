@@ -11,7 +11,7 @@ object HistogramBuilder {
       val xs = fn(x)
       xs.foreach { x =>
         val old = acc(x)
-        acc(x) = (old + 1)
+        acc(x) = old + 1
       }
       acc
     }.toMap
