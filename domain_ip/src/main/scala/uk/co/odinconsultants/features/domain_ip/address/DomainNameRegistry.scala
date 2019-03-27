@@ -77,16 +77,18 @@ object DomainNameRegistry {
     import io.github.minorg.whoisclient.WhoisClient
     import org.thryft.native_.InternetDomainName
     val address         = InternetDomainName.from(domain)
-    val whoIsServers    = Seq(
-      "whois.networksolutions.com",
-      "whois.verisign-grs.com",
+    val whoIsServers    = Seq( // sampled from https://stackoverflow.com/questions/18270575/the-list-of-all-com-and-net-whois-servers
       "whois.godaddy.com",
-      "whois.denic.de",
-      "whois.your-server.de",
-      "whois.secura-gmbh.de",
-      "whois.rockenstein.de",
-      "whois.registrar.telekom.de",
-      "whois.cps-datensysteme.de")
+      "whois.networksolutions.com",
+      "whois.enom.com",
+      "whois.name.com",
+      "whois.tucows.com",
+      "whois.PublicDomainRegistry.com",
+      "whois.register.com",
+      "whois.wildwestdomains.com",
+      "whois.markmonitor.com",
+      "whois2.softlayer.com",
+      "whois2.domain.com")
     val answers         = whoIsServers.flatMap { x =>
       println(s"Querying: $x")
       val whoIsServer     = InetAddress.getByName(x)

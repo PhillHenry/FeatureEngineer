@@ -1,10 +1,13 @@
 package uk.co.odinconsultants.features.linalg
 
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.{Matchers, WordSpec}
 
 import scala.collection.immutable.IndexedSeq
 import uk.co.odinconsultants.features.linalg.Space
 
+@RunWith(classOf[JUnitRunner])
 class EncodingsSpec extends WordSpec with Matchers {
 
   import Encodings._
