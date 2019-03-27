@@ -10,10 +10,10 @@ class EntropiesSpec extends WordSpec with Matchers {
   "Tossing a fair coin" should {
     val ps = Map("h" -> 0.5, "t" -> 0.5)
     "have entopy of 0.5" in {
-      entropyOf(Unigrams, "h", ps) shouldBe 0.5
+      entropyOf("h", Unigrams, ps) shouldBe 0.5
     }
     "have additive entropy when tossed several times" in {
-      entropyOf(Unigrams, "hh", ps) shouldBe 1d
+      entropyOf("hh", Unigrams, ps) shouldBe 1d
     }
   }
 
