@@ -79,7 +79,7 @@ object DomainNameRegistry {
 
     import org.thryft.native_.InternetDomainName
     val address         = InternetDomainName.from(domain)
-    val whoIsServers    = Seq( // sampled from https://stackoverflow.com/questions/18270575/the-list-of-all-com-and-net-whois-servers
+    val whoIsServers    = List( // sampled from https://stackoverflow.com/questions/18270575/the-list-of-all-com-and-net-whois-servers
       "whois.godaddy.com",
       "whois.networksolutions.com",
       "whois.enom.com",
@@ -91,12 +91,13 @@ object DomainNameRegistry {
       "whois.markmonitor.com",
       "whois2.softlayer.com",
       "whois2.domain.com")
-    val answers         = whoIsServers.flatMap { x =>
+    val answers         = whoIsServers.view.flatMap { x =>
       println(s"Querying: $x")
       val whoIsServer     = InetAddress.getByName(x)
 
       toOption(attemptParse(address, whoIsServer))
     }
+    println(s"About to filter over ${whoIsServers.size} DNSs...")
     answers.headOption
   }
 
