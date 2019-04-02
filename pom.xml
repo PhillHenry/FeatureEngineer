@@ -3,7 +3,7 @@
   <groupId>uk.co.odinconsultants.features</groupId>
   <artifactId>feature_engineer</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <modules>
         <module>general</module>
         <module>domain_ip</module>
@@ -11,6 +11,22 @@
     <name>${project.artifactId}</name>
   <description>Build feature vectors from data</description>
   <inceptionYear>2019</inceptionYear>
+
+  <url>https://github.com/PhillHenry/FeatureEngineer</url>
+  <licenses>
+    <license>
+      <name>Apache License Version 2.0</name>
+      <url>http://www.apache.org/licenses/</url>
+    </license>
+  </licenses>
+  <scm>
+    <url>https://github.com/PhillHenry/FeatureEngineer.git</url>
+  </scm>
+  <developers>
+    <developer>
+      <name>Phillip Henry</name>
+    </developer>
+  </developers>
 
   <properties>
     <maven.compiler.source>1.6</maven.compiler.source>
@@ -124,6 +140,20 @@
         <artifactId>maven-assembly-plugin</artifactId>
       </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.5</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
