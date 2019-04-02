@@ -5,6 +5,7 @@ import java.net.InetAddress
 import java.util.Date
 
 import com.google.common.base.Optional
+import org.thryft.native_.InternetDomainName
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
@@ -40,10 +41,11 @@ object DomainNameRegistry {
     val domains = Seq(
 //      "robomarkets.com",
 //      "mx5.umu.se",
-      "mx5.qatarairways.com.qa",
+//      "mx5.qatarairways.com.qa",
 //      "mx4.rcsecured.rcimx.net",
       "mx4.mk.de",
-      "mx4.hin.ch"
+//      "mx4.hin.ch",
+      "95a49f09385f5fb73aa3d1e994314a45b8d51f17.com"
     )
 
     domains.foreach { domain =>
@@ -74,7 +76,7 @@ object DomainNameRegistry {
 
   private def creationDateOf(domain: String): Option[Date] = {
     println(s"domain = $domain")
-    import io.github.minorg.whoisclient.WhoisClient
+
     import org.thryft.native_.InternetDomainName
     val address         = InternetDomainName.from(domain)
     val whoIsServers    = Seq( // sampled from https://stackoverflow.com/questions/18270575/the-list-of-all-com-and-net-whois-servers
@@ -92,14 +94,19 @@ object DomainNameRegistry {
     val answers         = whoIsServers.flatMap { x =>
       println(s"Querying: $x")
       val whoIsServer     = InetAddress.getByName(x)
-      val parser          = new WhoisClient()
-      val optCreationDate = Try {
-        val record = parser.getWhoisRecord(address, whoIsServer)
-        println(record)
-        record.getParsed.getCreationDate
-      }.getOrElse(Optional.absent())
-      if (optCreationDate.isPresent) Some(optCreationDate.get) else None
+
+      toOption(attemptParse(address, whoIsServer))
     }
     answers.headOption
   }
+
+  def toOption[T](x: Optional[T]): Option[T] = if (x.isPresent) Some(x.get) else None
+
+  def attemptParse(address: InternetDomainName, whoIsServer: InetAddress): Optional[java.util.Date] =
+    Try {
+      val parser = new io.github.minorg.whoisclient.WhoisClient()
+      val record = parser.getWhoisRecord(address, whoIsServer)
+      record.getParsed.getCreationDate
+    }.getOrElse(Optional.absent())
+
 }
