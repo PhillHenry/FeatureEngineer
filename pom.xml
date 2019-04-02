@@ -3,7 +3,7 @@
   <groupId>uk.co.odinconsultants.features</groupId>
   <artifactId>feature_engineer</artifactId>
     <packaging>pom</packaging>
-    <version>1.0</version>
+    <version>1.1</version>
     <modules>
         <module>general</module>
         <module>domain_ip</module>
@@ -140,6 +140,9 @@
         <artifactId>maven-assembly-plugin</artifactId>
       </plugin>
 
+      <!-- Deploy with:
+              mvn -Pjavadoc deploy
+       -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
@@ -181,7 +184,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.9.1</version>
+        <version>3.1.0</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -193,7 +196,72 @@
       </plugin>
 
     </plugins>
+
   </build>
+
+  <profiles>
+    <!-- See https://stackoverflow.com/questions/12301620/how-to-generate-an-aggregated-scaladoc-for-a-maven-site -->
+    <profile>
+      <id>javadoc</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>net.alchim31.maven</groupId>
+            <artifactId>scala-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>doc</id>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>compile</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <args>
+                <arg>-P:genjavadoc:out=${project.build.directory}/genjavadoc</arg>
+              </args>
+              <compilerPlugins>
+                <compilerPlugin>
+                  <groupId>com.typesafe.genjavadoc</groupId>
+                  <artifactId>genjavadoc-plugin_${scala.binary.full.version}</artifactId>
+                  <version>0.4</version>
+                </compilerPlugin>
+              </compilerPlugins>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>add-source</goal>
+                </goals>
+                <configuration>
+                  <sources>
+                    <source>${project.build.directory}/genjavadoc</source>
+                  </sources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.1.0</version>
+            <configuration>
+              <minmemory>64m</minmemory>
+              <maxmemory>2g</maxmemory>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <detectLinks>true</detectLinks>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
   <distributionManagement>
     <snapshotRepository>
