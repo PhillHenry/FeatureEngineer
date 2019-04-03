@@ -50,7 +50,7 @@ object DomainNameRegistry {
       val (name, tld)     = splitTLDs(domain, tlds.toSet)
       val lastDot         = name.lastIndexOf(".")
       val hostname        = if (lastDot == -1) name else name.substring(lastDot + 1)
-      val cleaned         = s"$hostname$tld"
+      val cleaned         = s"$hostname.$tld"
       val dateInfo        = creationDateOf(cleaned, t2d)
       log(s"$domain: $dateInfo")
     }
