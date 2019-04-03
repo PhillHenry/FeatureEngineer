@@ -51,7 +51,7 @@ object DomainNameRegistry {
       val lastDot         = name.lastIndexOf(".")
       val hostname        = if (lastDot == -1) name else name.substring(lastDot + 1)
       val cleaned         = s"$hostname.$tld"
-      val dateInfo        = creationDateOf(cleaned, t2d)
+      val dateInfo        = creationDateOf(cleaned, t2d(tld))
       log(s"$domain: $dateInfo")
     }
 
@@ -72,10 +72,10 @@ object DomainNameRegistry {
 
   type RecordData = (Date, Option[Date])
 
-  private def creationDateOf(domain: String, t2d: Map[String, Set[String]]): Option[RecordData] = {
+  private def creationDateOf(domain: String,
+                             dns: Set[String]): Option[RecordData] = {
     log(s"domain = $domain")
-    val (_, tld) = splitTLDs(domain, t2d.keys.toSet)
-    firstMatch(domain, t2d(tld))
+    firstMatch(domain, dns)
   }
 
   def firstMatch(domain: String, dns: Set[String]): Option[RecordData] = {
