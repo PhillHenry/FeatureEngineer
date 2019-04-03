@@ -25,6 +25,14 @@ class DomainNameRegistrySpec extends WordSpec with Matchers {
     }
   }
 
+  "Splitting URLs" should {
+    val tld       = "co.uk"
+    val hostname  = "bbc"
+    "separate host from TLD" in {
+      splitTLDs(s"$hostname.$tld", Set(tld)) shouldBe (hostname, tld)
+    }
+  }
+
   "The mappings between TLDs and DNS" should {
     val com   = "com"
     val coUk  = "co.uk"

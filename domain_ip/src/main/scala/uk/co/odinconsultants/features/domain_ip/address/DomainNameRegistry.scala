@@ -41,23 +41,18 @@ object DomainNameRegistry {
 
   def minorg(tlds: Seq[String]): Unit = {
     val domains = Seq(
-//      "robomarkets.com",
-//      "mx5.umu.se",
-//      "mx5.qatarairways.com.qa",
-//      "mx4.rcsecured.rcimx.net",
       "mx4.mk.de",
-//      "mx4.hin.ch",
       "95a49f09385f5fb73aa3d1e994314a45b8d51f17.com"
     )
 
+    val t2d             = tldToDNS(whoIsServers, tlds.toSet)
     domains.foreach { domain =>
-      val (name, tld) = splitTLDs(domain, tlds.toSet)
-      val lastDot     = name.lastIndexOf(".")
-      val hostname    = if (lastDot == -1) name else name.substring(lastDot + 1)
-      val cleaned     = s"$hostname$tld"
-//      log(s"$hostname + $tld = $cleaned (name = $name, tld = $tld)")
-      val optCreationDate = creationDateOf(cleaned) //
-      log(s"$domain: $optCreationDate")
+      val (name, tld)     = splitTLDs(domain, tlds.toSet)
+      val lastDot         = name.lastIndexOf(".")
+      val hostname        = if (lastDot == -1) name else name.substring(lastDot + 1)
+      val cleaned         = s"$hostname$tld"
+      val dateInfo        = creationDateOf(cleaned, t2d)
+      log(s"$domain: $dateInfo")
     }
 
   }
@@ -73,22 +68,24 @@ object DomainNameRegistry {
     }
   }
 
-  def longestToShortest(xs: Set[String]): Seq[String] =
-    xs.toList.sortBy(- _.length)
+  def longestToShortest(xs: Set[String]): Seq[String] = xs.toList.sortBy(- _.length)
 
   type RecordData = (Date, Option[Date])
 
-  private def creationDateOf(domain: String): Option[RecordData] = {
+  private def creationDateOf(domain: String, t2d: Map[String, Set[String]]): Option[RecordData] = {
     log(s"domain = $domain")
+    val (_, tld) = splitTLDs(domain, t2d.keys.toSet)
+    firstMatch(domain, t2d(tld))
+  }
 
+  def firstMatch(domain: String, dns: Set[String]): Option[RecordData] = {
     import org.thryft.native_.InternetDomainName
-    val address         = InternetDomainName.from(domain)
-
-    val answers         = whoIsServers.map(_.toLowerCase).toList.sorted.zipWithIndex.view.flatMap { case (x, i) =>
+    val address = InternetDomainName.from(domain)
+    val answers = dns.map(_.toLowerCase).toList.sorted.zipWithIndex.view.flatMap { case (x, i) =>
       log(s"$i. Querying: $x")
       attemptParse(address, x)
     }
-    log(s"About to filter over ${whoIsServers.size} DNSs...")
+    log(s"About to filter over ${dns.size} DNSs...")
     answers.headOption
   }
 
@@ -439,7 +436,6 @@ object DomainNameRegistry {
     "whois.ihs.com.tr",
     "whois.idindi.com",
     "whois.idgenesis.com",
-    "whois.ibi.net",
     "whois.iaregistry.com",
     "whois.hyperstreet.com",
     "whois.hupo.com",
