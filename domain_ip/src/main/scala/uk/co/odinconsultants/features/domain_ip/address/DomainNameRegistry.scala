@@ -74,7 +74,9 @@ object DomainNameRegistry {
   def longestToShortest(xs: Set[String]): Seq[String] =
     xs.toList.sortBy(- _.length)
 
-  private def creationDateOf(domain: String): Option[Date] = {
+  type RecordData = (Date, Option[Date])
+
+  private def creationDateOf(domain: String): Option[RecordData] = {
     println(s"domain = $domain")
 
     import org.thryft.native_.InternetDomainName
@@ -95,7 +97,7 @@ object DomainNameRegistry {
       println(s"Querying: $x")
       val whoIsServer     = InetAddress.getByName(x)
 
-      toOption(attemptParse(address, whoIsServer))
+      attemptParse(address, whoIsServer)
     }
     println(s"About to filter over ${whoIsServers.size} DNSs...")
     answers.headOption
@@ -103,11 +105,12 @@ object DomainNameRegistry {
 
   def toOption[T](x: Optional[T]): Option[T] = if (x.isPresent) Some(x.get) else None
 
-  def attemptParse(address: InternetDomainName, whoIsServer: InetAddress): Optional[java.util.Date] =
+  def attemptParse(address: InternetDomainName, whoIsServer: InetAddress): Option[RecordData] =
     Try {
       val parser = new io.github.minorg.whoisclient.WhoisClient()
       val record = parser.getWhoisRecord(address, whoIsServer)
-      record.getParsed.getCreationDate
-    }.getOrElse(Optional.absent())
+      val parsed = record.getParsed
+      toOption(parsed.getCreationDate).map { x => (x, toOption(parsed.getExpirationDate)) }
+    }.getOrElse(None)
 
 }

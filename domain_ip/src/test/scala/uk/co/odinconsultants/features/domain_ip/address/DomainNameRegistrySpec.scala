@@ -21,7 +21,7 @@ class DomainNameRegistrySpec extends WordSpec with Matchers {
     val badDomain = InternetDomainName.from("x")
     val goodDNS   = InetAddress.getByName("whois.networksolutions.com")
     "yield none for bad domains" in {
-      attemptParse(badDomain, goodDNS) shouldBe Optional.absent()
+      attemptParse(badDomain, goodDNS) shouldBe None
     }
   }
 
