@@ -225,7 +225,7 @@
               <compilerPlugins>
                 <compilerPlugin>
                   <groupId>com.typesafe.genjavadoc</groupId>
-                  <artifactId>genjavadoc-plugin_${scala.binary.full.version}</artifactId>
+                  <artifactId>genjavadoc-plugin_${scala.compat.version}</artifactId>
                   <version>0.4</version>
                 </compilerPlugin>
               </compilerPlugins>
