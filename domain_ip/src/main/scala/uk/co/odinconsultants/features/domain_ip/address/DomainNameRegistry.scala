@@ -5,6 +5,7 @@ import java.net.InetAddress
 import java.util.Date
 
 import com.google.common.base.Optional
+import io.github.minorg.whoisclient.ParsedWhoisRecord
 import org.thryft.native_.InternetDomainName
 
 import scala.collection.mutable.ArrayBuffer
@@ -52,10 +53,9 @@ object DomainNameRegistry {
       val lastDot         = name.lastIndexOf(".")
       val hostname        = if (lastDot == -1) name else name.substring(lastDot + 1)
       val cleaned         = s"$hostname.$tld"
-      val dateInfo        = creationDateOf(cleaned, whoIsServers)
+      val dateInfo        = creationDateOf(cleaned, whoIsServers) // TODO put this back to t2d(tld)
       log(s"$domain: $dateInfo")
     }
-
   }
 
   def splitTLDs(domain: String, tlds: Set[String]): (String, String) = {
@@ -98,13 +98,24 @@ object DomainNameRegistry {
       val parser = new io.github.minorg.whoisclient.WhoisClient()
       val record = parser.getWhoisRecord(address, dns)
       val parsed = record.getParsed
-      toOption(parsed.getCreationDate).map { x => (x, toOption(parsed.getExpirationDate)) }
+      toRecordData(parsed)
     }
     result match {
       case Success(x) => x
       case Failure(x) =>
         log(x.getClass.getSimpleName + ": " + x.getMessage)
         None
+    }
+  }
+
+  def toRecordData(parsed: ParsedWhoisRecord): Option[RecordData] = {
+    val date = toOption(parsed.getCreationDate)
+    ignoringEpoch(date, parsed)
+  }
+
+  def ignoringEpoch(date: Option[Date], parsed: ParsedWhoisRecord): Option[RecordData] = {
+    date.flatMap { x =>
+      if (x.getTime == 0L) None else  Some((x, toOption(parsed.getExpirationDate)))
     }
   }
 

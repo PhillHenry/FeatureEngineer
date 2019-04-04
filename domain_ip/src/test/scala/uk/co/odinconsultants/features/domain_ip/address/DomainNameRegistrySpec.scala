@@ -1,7 +1,5 @@
 package uk.co.odinconsultants.features.domain_ip.address
 
-import java.net.InetAddress
-
 import com.google.common.base.Optional
 import org.scalatest.{Matchers, WordSpec}
 import org.thryft.native_.InternetDomainName
@@ -9,6 +7,12 @@ import org.thryft.native_.InternetDomainName
 class DomainNameRegistrySpec extends WordSpec with Matchers {
 
   import DomainNameRegistry._
+
+  "A date of epoch" should {
+    "be ignored" in {
+      ignoringEpoch(Some(new java.util.Date(0)), null) shouldBe None
+    }
+  }
 
   "Google optional" should {
     "map to Scala" in {
