@@ -83,7 +83,7 @@ object DomainNameRegistry {
     import org.thryft.native_.InternetDomainName
     val address = InternetDomainName.from(domain)
     val answers = dns.map(_.toLowerCase).toList.sorted.zipWithIndex.view.flatMap { case (x, i) =>
-      log(s"$i. Querying: $x")
+      log(s"$i. Querying: $x about $address")
       attemptParse(address, x)
     }
     log(s"About to filter over ${dns.size} DNSs...")
@@ -94,10 +94,10 @@ object DomainNameRegistry {
 
   def attemptParse(address: InternetDomainName, dnsName: String): Option[RecordData] = {
     val result = Try {
-      val dns = InetAddress.getByName(dnsName)
-      val parser = new io.github.minorg.whoisclient.WhoisClient()
-      val record = parser.getWhoisRecord(address, dns)
-      val parsed = record.getParsed
+      val dns     = InetAddress.getByName(dnsName)
+      val parser  = new io.github.minorg.whoisclient.WhoisClient()
+      val record  = parser.getWhoisRecord(address, dns)
+      val parsed  = record.getParsed
       toRecordData(parsed)
     }
     result match {
@@ -115,7 +115,7 @@ object DomainNameRegistry {
 
   def ignoringEpoch(date: Option[Date], parsed: ParsedWhoisRecord): Option[RecordData] = {
     date.flatMap { x =>
-      if (x.getTime == 0L) None else  Some((x, toOption(parsed.getExpirationDate)))
+      if (x.getTime <= 0L) None else  Some((x, toOption(parsed.getExpirationDate))) // Thu Jan 01 00:00:00 GMT 1970) == -3600000
     }
   }
 
