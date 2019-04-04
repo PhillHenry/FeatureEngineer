@@ -8,7 +8,7 @@ import com.google.common.base.Optional
 import org.thryft.native_.InternetDomainName
 
 import scala.collection.mutable.ArrayBuffer
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 object DomainNameRegistry {
 
@@ -41,8 +41,9 @@ object DomainNameRegistry {
 
   def minorg(tlds: Seq[String]): Unit = {
     val domains = Seq(
+      "www.bbc.co.uk",
       "mx4.mk.de",
-      "95a49f09385f5fb73aa3d1e994314a45b8d51f17.com"
+      "95a49f09385f5fb73aa3d1e994314a45b8d51f17.com" // first alphabetically ordered DNS to resolve is whois.aitdomains.com
     )
 
     val t2d             = tldToDNS(whoIsServers, tlds.toSet)
@@ -51,7 +52,7 @@ object DomainNameRegistry {
       val lastDot         = name.lastIndexOf(".")
       val hostname        = if (lastDot == -1) name else name.substring(lastDot + 1)
       val cleaned         = s"$hostname.$tld"
-      val dateInfo        = creationDateOf(cleaned, t2d(tld))
+      val dateInfo        = creationDateOf(cleaned, whoIsServers)
       log(s"$domain: $dateInfo")
     }
 
@@ -72,8 +73,8 @@ object DomainNameRegistry {
 
   type RecordData = (Date, Option[Date])
 
-  private def creationDateOf(domain: String,
-                             dns: Set[String]): Option[RecordData] = {
+  private def creationDateOf(domain:  String,
+                             dns:     Set[String]): Option[RecordData] = {
     log(s"domain = $domain")
     firstMatch(domain, dns)
   }
@@ -91,14 +92,21 @@ object DomainNameRegistry {
 
   def toOption[T](x: Optional[T]): Option[T] = if (x.isPresent) Some(x.get) else None
 
-  def attemptParse(address: InternetDomainName, dnsName: String): Option[RecordData] =
-    Try {
-      val dns    = InetAddress.getByName(dnsName)
+  def attemptParse(address: InternetDomainName, dnsName: String): Option[RecordData] = {
+    val result = Try {
+      val dns = InetAddress.getByName(dnsName)
       val parser = new io.github.minorg.whoisclient.WhoisClient()
       val record = parser.getWhoisRecord(address, dns)
       val parsed = record.getParsed
       toOption(parsed.getCreationDate).map { x => (x, toOption(parsed.getExpirationDate)) }
-    }.getOrElse(None)
+    }
+    result match {
+      case Success(x) => x
+      case Failure(x) =>
+        log(x.getClass.getSimpleName + ": " + x.getMessage)
+        None
+    }
+  }
 
   def tldToDNS(dns: Set[String], tlds: Set[String]): Map[String, Set[String]] = {
     val tld2Dns = Map[String, Set[String]]().withDefault(_ => Set[String]())
@@ -110,7 +118,7 @@ object DomainNameRegistry {
     }
   }
 
-  val whoIsServers    = Set( // sampled from https://stackoverflow.com/questions/18270575/the-list-of-all-com-and-net-whois-servers
+  private val whoIsServers = Set( // sampled from https://stackoverflow.com/questions/18270575/the-list-of-all-com-and-net-whois-servers
     "whois.godaddy.com",
     "whois.networksolutions.com",
     "whois.enom.com",
