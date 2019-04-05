@@ -33,7 +33,7 @@ object DomainNameRegistry {
 
   def apache(x: String): Unit = {
     val results = whoIsServers.map(_.toLowerCase).toList.sorted.zipWithIndex.view.flatMap { case (dns, i) =>
-      log(s"$i. Querying $dns")
+      log(s"$i. Querying $dns about $x")
       apacheWhois(dns, x)
     }
     log(results.headOption.toString)
@@ -42,6 +42,8 @@ object DomainNameRegistry {
   def apacheWhois(dns: String, x: String): Option[RecordData] = Try {
     val client = new WhoisClient()
     client.setConnectTimeout(5000)
+//    client.setSoTimeout(5000)
+    client.setDefaultTimeout(5000)
     client.connect(dns)
     val str = client.query(x)
     log(str)
