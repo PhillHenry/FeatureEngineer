@@ -141,7 +141,7 @@ object DomainNameRegistry {
 
   def ignoringEpoch(date: Option[Date], parsed: ParsedWhoisRecord): Option[RecordData] = {
     date.flatMap { x =>
-      if (x.getTime <= 0L) None else  Some((x, toOption(parsed.getExpirationDate))) // Thu Jan 01 00:00:00 GMT 1970) == -3600000
+      if (x.getTime <= 3600L * 1000L * 25) None else  Some((x, toOption(parsed.getExpirationDate))) // Some DNS servers report 1 Jan 1970 in their timezone
     }
   }
 
