@@ -2,10 +2,14 @@ package uk.co.odinconsultants.features.domain_ip.address
 
 import java.io.{BufferedReader, InputStreamReader}
 import java.net.InetAddress
-import java.util.Date
+import java.util
+import java.util.{ArrayList, Date, List}
 
 import com.google.common.base.Optional
-import io.github.minorg.whoisclient.ParsedWhoisRecord
+import com.google.common.collect.ImmutableList
+import io.github.minorg.whoisclient.{ParsedWhoisRecord, RawWhoisRecord}
+import io.github.minorg.whoisclient.parser.WhoisRecordParser
+import org.apache.commons.net.whois.WhoisClient
 import org.thryft.native_.InternetDomainName
 
 import scala.collection.mutable.ArrayBuffer
@@ -17,15 +21,41 @@ object DomainNameRegistry {
 
   def main(args: Array[String]): Unit = {
     val xs = tlds()
+    val domains = Seq(
+      "www.bbc.co.uk",
+      "mx4.mk.de",
+      "95a49f09385f5fb73aa3d1e994314a45b8d51f17.com" // first alphabetically ordered DNS to resolve is whois.aitdomains.com
+    )
     log(s"Number of TLDs: ${xs.length}")
-    minorg(xs)
+//    minorg(xs, domains)
+    domains.foreach(apache(_))
   }
 
-  def apache(): Unit = {
-    import org.apache.commons.net.whois.WhoisClient
+  def apache(x: String): Unit = {
+    val results = whoIsServers.map(_.toLowerCase).toList.sorted.zipWithIndex.view.flatMap { case (dns, i) =>
+      log(s"$i. Querying $dns")
+      apacheWhois(dns, x)
+    }
+    log(results.headOption.toString)
+  }
+
+  def apacheWhois(dns: String, x: String): Option[RecordData] = Try {
     val client = new WhoisClient()
-    log(client.query("robomarkets.com"))
+    client.setConnectTimeout(5000)
+    client.connect(dns)
+    val str = client.query(x)
+    log(str)
+    val parser = new WhoisRecordParser()
+    val record = RawWhoisRecord.create(InternetDomainName.from(x), ImmutableList.of(InternetDomainName.from(dns)), new Date, str)
+    val parsed = parser.parse(record)
+    val opt = toRecordData(parsed.getParsed)
     client.disconnect()
+    opt
+  } match {
+    case Success(x) => x
+    case Failure(x) =>
+      println(s"$dns failed with ${x.getMessage}")
+      None
   }
 
   def tlds(): Seq[String] = {
@@ -40,13 +70,7 @@ object DomainNameRegistry {
     output
   }
 
-  def minorg(tlds: Seq[String]): Unit = {
-    val domains = Seq(
-      "www.bbc.co.uk",
-      "mx4.mk.de",
-      "95a49f09385f5fb73aa3d1e994314a45b8d51f17.com" // first alphabetically ordered DNS to resolve is whois.aitdomains.com
-    )
-
+  def minorg(tlds: Seq[String], domains: Seq[String]): Unit = {
     val t2d             = tldToDNS(whoIsServers, tlds.toSet)
     domains.foreach { domain =>
       val (name, tld)     = splitTLDs(domain, tlds.toSet)
