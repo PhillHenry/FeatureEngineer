@@ -1,21 +1,21 @@
 package uk.co.odinconsultants.features.domain_ip.address
 
-import io.circe.Decoder.Result
+import io.circe.parser._
+import io.circe.{Decoder, Error}
 
 import scala.io.Source
-import io.circe.{Decoder, Error, Json, ParsingFailure}
-import io.circe._
-import io.circe.cursor.TopCursor
-import io.circe.generic.semiauto._
-import io.circe.parser._
-
 
 object Tld2DnsParser {
 
   def main(args: Array[String]): Unit = {
+    val mappings = readMappings
+    println(mappings)
+  }
+
+  def readMappings: Either[Error, Mapping] = {
     val is = Tld2DnsParser.getClass.getResourceAsStream("/tld2dns.json")
     val json = Source.fromInputStream(is).getLines().mkString("")
-    println(parse(json))
+    parse(json)
   }
 
   type Mapping = Map[String, String]
