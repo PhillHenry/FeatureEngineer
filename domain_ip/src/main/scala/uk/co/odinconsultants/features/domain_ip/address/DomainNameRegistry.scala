@@ -28,7 +28,7 @@ object DomainNameRegistry {
     )
     log(s"Number of TLDs: ${xs.length}")
 //    minorg(xs, domains)
-    domains.foreach(apache(_))
+    domains.foreach ( x => apache(clean(tlds, x)) )
   }
 
   def apache(x: String): Unit = {
@@ -75,13 +75,17 @@ object DomainNameRegistry {
   def minorg(tlds: Seq[String], domains: Seq[String]): Unit = {
     val t2d             = tldToDNS(whoIsServers, tlds.toSet)
     domains.foreach { domain =>
-      val (name, tld)     = splitTLDs(domain, tlds.toSet)
-      val lastDot         = name.lastIndexOf(".")
-      val hostname        = if (lastDot == -1) name else name.substring(lastDot + 1)
-      val cleaned         = s"$hostname.$tld"
-      val dateInfo        = creationDateOf(cleaned, whoIsServers) // TODO put this back to t2d(tld)
+      val cleaned   = clean(tlds, domain)
+      val dateInfo  = creationDateOf(cleaned, whoIsServers) // TODO put this back to t2d(tld)
       log(s"$domain: $dateInfo")
     }
+  }
+
+  def clean(tlds: Seq[String], domain: String): String = {
+    val (name, tld) = splitTLDs(domain, tlds.toSet)
+    val lastDot = name.lastIndexOf(".")
+    val hostname = if (lastDot == -1) name else name.substring(lastDot + 1)
+    s"$hostname.$tld"
   }
 
   def splitTLDs(domain: String, tlds: Set[String]): (String, String) = {
