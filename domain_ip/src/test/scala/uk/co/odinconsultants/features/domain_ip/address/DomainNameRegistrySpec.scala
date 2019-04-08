@@ -1,12 +1,32 @@
 package uk.co.odinconsultants.features.domain_ip.address
 
+import java.util.Date
+
 import com.google.common.base.Optional
+import io.github.minorg.whoisclient.ParsedWhoisRecord
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
+import org.mockito.Mockito._
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{Matchers, WordSpec}
 import org.thryft.native_.InternetDomainName
+import com.google.common.base.Optional
 
-class DomainNameRegistrySpec extends WordSpec with Matchers {
+@RunWith(classOf[JUnitRunner])
+class DomainNameRegistrySpec extends WordSpec with Matchers with MockitoSugar {
 
   import DomainNameRegistry._
+
+  "A record without a creation date" should {
+    val date        = new Date()
+    val anotherDate = new Date(date.getTime + 1)
+    "use the last updated date if available" in {
+      val mockRecord = mock[ParsedWhoisRecord]
+      when(mockRecord.getCreationDate).thenReturn(Optional.of(date))
+      when(mockRecord.getExpirationDate).thenReturn(Optional.of(anotherDate))
+      toRecordData(mockRecord) // TODO assert
+    }
+  }
 
   "A date of epoch" should {
     "be ignored" in {
