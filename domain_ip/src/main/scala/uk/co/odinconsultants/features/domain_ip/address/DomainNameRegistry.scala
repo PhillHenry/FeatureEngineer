@@ -20,7 +20,6 @@ object DomainNameRegistry {
   def log(x: String): Unit = println(s"${new Date}: $x")
 
   def main(args: Array[String]): Unit = {
-    val xs = tlds()
     val domains = Seq(
       "www.bbc.co.uk",
       "mx4.mk.de",
@@ -31,26 +30,20 @@ object DomainNameRegistry {
       val dates = domains.map { x =>
         t2d.view.filter { case (t, _) =>
           x.endsWith(t)
-        }.headOption.map{ case (_, dns) =>
+        }.headOption.flatMap { case (_, dns) =>
           val cleaned = clean(tlds, x)
           apacheWhois(dns, cleaned)
         }
       }
-      dates.foreach(println)
+      domains.zip(dates).foreach(println)
     }
   }
 
   def apacheWhois(dns: String, x: String): Option[RecordData] = Try {
-    val client = new WhoisClient()
-    client.setConnectTimeout(5000)
-    client.setDefaultTimeout(5000)
-    client.connect(dns)
-    val str = client.query(x)
-    log(str)
-    val parser = new WhoisRecordParser()
-    val record = RawWhoisRecord.create(InternetDomainName.from(x), ImmutableList.of(InternetDomainName.from(dns)), new Date, str)
-    val parsed = parser.parse(record)
-    val opt = toRecordData(parsed.getParsed)
+    val client  = whoIsConnection(dns)
+    val str     = client.query(x)
+//    log(str)
+    val opt     = parse(dns, x, str)
     client.disconnect()
     opt
   } match {
@@ -58,6 +51,21 @@ object DomainNameRegistry {
     case Failure(x) =>
       println(s"$dns failed with ${x.getMessage}")
       None
+  }
+
+  def parse(dns: String, x: String, str: String): Option[RecordData] = {
+    val parser = new WhoisRecordParser()
+    val record = RawWhoisRecord.create(InternetDomainName.from(x), ImmutableList.of(InternetDomainName.from(dns)), new Date, str)
+    val parsed = parser.parse(record)
+    toRecordData(parsed.getParsed)
+  }
+
+  private def whoIsConnection(dns: String): WhoisClient = {
+    val client = new WhoisClient()
+    client.setConnectTimeout(5000)
+    client.setDefaultTimeout(5000)
+    client.connect(dns)
+    client
   }
 
   def tlds(): Seq[String] = {
