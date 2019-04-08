@@ -17,14 +17,28 @@ class DomainNameRegistrySpec extends WordSpec with Matchers with MockitoSugar {
 
   import DomainNameRegistry._
 
-  "A record without a creation date" should {
+  "A record" should {
     val date        = new Date()
     val anotherDate = new Date(date.getTime + 1)
-    "use the last updated date if available" in {
+    val noDate      = Optional.absent[Date]()
+    "use the last updated date if creation date is unavailable" in {
+      val mockRecord = mock[ParsedWhoisRecord]
+      when(mockRecord.getCreationDate).thenReturn(noDate)
+      when(mockRecord.getExpirationDate).thenReturn(noDate)
+      when(mockRecord.getUpdatedDate).thenReturn(Optional.of(date))
+      toRecordData(mockRecord) shouldBe Some(date, None)
+    }
+    "also use the expiration data if available" in {
       val mockRecord = mock[ParsedWhoisRecord]
       when(mockRecord.getCreationDate).thenReturn(Optional.of(date))
       when(mockRecord.getExpirationDate).thenReturn(Optional.of(anotherDate))
-      toRecordData(mockRecord) // TODO assert
+      toRecordData(mockRecord) shouldBe Some(date, Some(anotherDate))
+    }
+    "use the creation date even if expiration date is unavailable" in {
+      val mockRecord = mock[ParsedWhoisRecord]
+      when(mockRecord.getCreationDate).thenReturn(Optional.of(date))
+      when(mockRecord.getExpirationDate).thenReturn(noDate)
+      toRecordData(mockRecord) shouldBe Some(date, None)
     }
   }
 

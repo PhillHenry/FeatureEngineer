@@ -28,10 +28,10 @@ object DomainNameRegistry {
     Tld2DnsParser.readMappings.right.foreach { mappings =>
       val t2d = mappings.toSeq.sortBy(- _._1.length)
       val dates = domains.map { x =>
-        t2d.view.filter { case (t, _) =>
+        t2d.view.find { case (t, _) =>
           x.endsWith(t)
-        }.headOption.flatMap { case (_, dns) =>
-          val cleaned = clean(tlds, x)
+        }.flatMap { case (_, dns) =>
+          val cleaned = clean(tlds(), x)
           apacheWhois(dns, cleaned)
         }
       }
@@ -39,11 +39,11 @@ object DomainNameRegistry {
     }
   }
 
-  def apacheWhois(dns: String, x: String): Option[RecordData] = Try {
+  def apacheWhois(dns: String, domain: String): Option[RecordData] = Try {
     val client  = whoIsConnection(dns)
-    val str     = client.query(x)
+    val str     = client.query(domain)
 //    log(str)
-    val opt     = parse(dns, x, str)
+    val opt     = parse(dns, domain, str)
     client.disconnect()
     opt
   } match {
@@ -132,7 +132,10 @@ object DomainNameRegistry {
   }
 
   def toRecordData(parsed: ParsedWhoisRecord): Option[RecordData] = {
-    val date = toOption(parsed.getCreationDate)
+    val date = toOption(parsed.getCreationDate) match {
+      case x @ Some(_)  => x
+      case None         => toOption(parsed.getUpdatedDate)
+    }
     ignoringEpoch(date, parsed)
   }
 
