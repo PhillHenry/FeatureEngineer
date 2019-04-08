@@ -9,6 +9,10 @@ class Tld2DnsParserSpec extends WordSpec with Matchers {
   "JSON" should {
     "be transformed to a map" in {
       val json = """{
+                   |  "abb": {
+                   |    "_type": "newgtld",
+                   |    "adapter": "none"
+                   |  },
                    |  "abbott": {
                    |    "_group": "afiliassrs",
                    |    "_type": "newgtld",
