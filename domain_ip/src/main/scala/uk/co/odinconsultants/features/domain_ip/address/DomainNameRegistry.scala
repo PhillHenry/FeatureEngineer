@@ -46,29 +46,37 @@ object DomainNameRegistry {
       "95a49f09385f5fb73aa3d1e994314a45b8d51f17.com" // first alphabetically ordered DNS to resolve is whois.aitdomains.com
     )
     Tld2DnsParser.readMappings.right.foreach { mappings =>
-      val t2d           = mappings.toSeq.sortBy(- _._1.length)
+      val t2d           = sortByLongestTLD(mappings.toSeq)
       val tlds          = loadTLDs()
-      val dates         = datesOf(domains, tlds, t2d)
+      val dates         = datesOf(domains, tlds, t2d, apacheWhois)
       val namesAndDates = domains.zip(dates)
       namesAndDates.foreach(println)
       println("# undefined: " + namesAndDates.count(_._2 == None))
     }
   }
 
+  def sortByLongestTLD(xs: Seq[TLD2Domain]): Seq[TLD2Domain] = xs.sortBy(- _._1.length)
+
   type TLD2Domain = (String, String)
 
-  def datesOf(domains: Seq[String], tlds: Seq[String], t2d: Seq[TLD2Domain]): Seq[Option[RecordData]] =
+  type WhoIsFn = (String, String) => Option[RecordData]
+
+  def datesOf(domains:  Seq[String],
+              tlds:     Seq[String],
+              t2d:      Seq[TLD2Domain],
+              fn:       WhoIsFn): Seq[Option[RecordData]] =
     domains.map { x =>
-      suitableDNSFor(x, t2d).flatMap { case (_, dns) =>
+      val maybeDNS = suitableDNSFor(x, t2d)
+      maybeDNS.flatMap { dns =>
         val cleaned = clean(tlds, x)
-        apacheWhois(dns, cleaned)
+        fn(dns, cleaned)
       }
     }
 
-  def suitableDNSFor(domain: String, t2d: Seq[(TLD2Domain)]): Option[(TLD2Domain)] =
+  def suitableDNSFor(domain: String, t2d: Seq[(TLD2Domain)]): Option[String] =
     t2d.view.find { case (t, _) =>
       domain.endsWith(t)
-    }
+    }.map(_._2)
 
   def apacheWhois(dns: String, domain: String): Option[RecordData] = Try {
     val client  = whoIsConnection(dns)
@@ -175,13 +183,4 @@ object DomainNameRegistry {
     }
   }
 
-  def tldToDNS(dns: Set[String], tlds: Set[String]): Map[String, Set[String]] = {
-    val tld2Dns = Map[String, Set[String]]().withDefault(_ => Set[String]())
-    dns.foldLeft(tld2Dns) { case( t2d, x) =>
-      val (_, tld)            = splitTLDs(x, tlds)
-      val old:    Set[String] = t2d(tld)
-      val added:  Set[String] = old + x
-      t2d + (tld -> added)
-    }
-  }
 }
