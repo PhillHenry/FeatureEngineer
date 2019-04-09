@@ -2,13 +2,12 @@ package uk.co.odinconsultants.features.domain_ip.address
 
 import java.io.{BufferedReader, InputStreamReader}
 import java.net.InetAddress
-import java.util
-import java.util.{ArrayList, Date, List}
+import java.util.Date
 
 import com.google.common.base.Optional
 import com.google.common.collect.ImmutableList
-import io.github.minorg.whoisclient.{ParsedWhoisRecord, RawWhoisRecord}
 import io.github.minorg.whoisclient.parser.WhoisRecordParser
+import io.github.minorg.whoisclient.{ParsedWhoisRecord, RawWhoisRecord}
 import org.apache.commons.net.whois.WhoisClient
 import org.thryft.native_.InternetDomainName
 
@@ -25,7 +24,7 @@ object DomainNameRegistry {
     Tld2DnsParser.readMappings.right.foreach { mappings =>
       val t2d           = sortByLongestTLD(mappings.toSeq)
       val tlds          = loadTLDs()
-      val dates         = datesOf(domains, tlds, t2d, apacheWhois)
+      val dates         = datesOf(domains, tlds, t2d, apacheWhoIs)
       val namesAndDates = domains.zip(dates)
 
       def toString(x: Option[RecordData]): String = x.map { case (c, e) => c.toString }.getOrElse("-")
@@ -59,7 +58,7 @@ object DomainNameRegistry {
       domain.endsWith(t)
     }.map(_._2)
 
-  def apacheWhois(dns: String, domain: String): Option[RecordData] = Try {
+  def apacheWhoIs(dns: String, domain: String): Option[RecordData] = Try {
     val client  = whoIsConnection(dns)
     val str     = client.query(domain)
     val opt     = parse(dns, domain, str)
@@ -120,17 +119,6 @@ object DomainNameRegistry {
   def longestToShortest(xs: Set[String]): Seq[String] = xs.toList.sortBy(- _.length)
 
   type RecordData = (Date, Option[Date])
-
-  def firstMatch(domain: String, dns: Set[String]): Option[RecordData] = {
-    import org.thryft.native_.InternetDomainName
-    val address = InternetDomainName.from(domain)
-    val answers = dns.map(_.toLowerCase).toList.sorted.zipWithIndex.view.flatMap { case (x, i) =>
-      log(s"$i. Querying: $x about $address")
-      attemptParse(address, x)
-    }
-    log(s"About to filter over ${dns.size} DNSs...")
-    answers.headOption
-  }
 
   def toOption[T](x: Optional[T]): Option[T] = if (x.isPresent) Some(x.get) else None
 
