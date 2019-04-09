@@ -46,23 +46,33 @@ object DomainNameRegistry {
       "95a49f09385f5fb73aa3d1e994314a45b8d51f17.com" // first alphabetically ordered DNS to resolve is whois.aitdomains.com
     )
     Tld2DnsParser.readMappings.right.foreach { mappings =>
-      val t2d = mappings.toSeq.sortBy(- _._1.length)
-      val dates = domains.map { x =>
-        t2d.view.find { case (t, _) =>
-          x.endsWith(t)
-        }.flatMap { case (_, dns) =>
-          val cleaned = clean(tlds(), x)
-          apacheWhois(dns, cleaned)
-        }
-      }
-      domains.zip(dates).foreach(println)
+      val t2d           = mappings.toSeq.sortBy(- _._1.length)
+      val tlds          = loadTLDs()
+      val dates         = datesOf(domains, tlds, t2d)
+      val namesAndDates = domains.zip(dates)
+      namesAndDates.foreach(println)
+      println("# undefined: " + namesAndDates.count(_._2 == None))
     }
   }
+
+  type TLD2Domain = (String, String)
+
+  def datesOf(domains: Seq[String], tlds: Seq[String], t2d: Seq[TLD2Domain]): Seq[Option[RecordData]] =
+    domains.map { x =>
+      suitableDNSFor(x, t2d).flatMap { case (_, dns) =>
+        val cleaned = clean(tlds, x)
+        apacheWhois(dns, cleaned)
+      }
+    }
+
+  def suitableDNSFor(domain: String, t2d: Seq[(TLD2Domain)]): Option[(TLD2Domain)] =
+    t2d.view.find { case (t, _) =>
+      domain.endsWith(t)
+    }
 
   def apacheWhois(dns: String, domain: String): Option[RecordData] = Try {
     val client  = whoIsConnection(dns)
     val str     = client.query(domain)
-//    log(str)
     val opt     = parse(dns, domain, str)
     client.disconnect()
     opt
@@ -88,7 +98,7 @@ object DomainNameRegistry {
     client
   }
 
-  def tlds(): Seq[String] = {
+  def loadTLDs(): Seq[String] = {
     val stream  = DomainNameRegistry.getClass.getClassLoader.getResourceAsStream("top-1m-TLD.csv")
     val buffer  = new BufferedReader(new InputStreamReader(stream))
     val output  = new ArrayBuffer[String]()
