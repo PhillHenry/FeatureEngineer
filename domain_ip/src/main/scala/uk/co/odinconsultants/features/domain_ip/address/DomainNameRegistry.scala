@@ -13,6 +13,7 @@ import org.apache.commons.net.whois.WhoisClient
 import org.thryft.native_.InternetDomainName
 
 import scala.collection.mutable.ArrayBuffer
+import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
 object DomainNameRegistry {
@@ -20,37 +21,15 @@ object DomainNameRegistry {
   def log(x: String): Unit = println(s"${new Date}: $x")
 
   def main(args: Array[String]): Unit = {
-    val domains = Seq(
-      "netflix.com",
-      "api-global.netflix.com",
-      "prod.netflix.com",
-      "push.prod.netflix.com",
-      "ichnaea.netflix.com",
-      "google.com",
-      "secure.netflix.com",
-      "microsoft.com",
-      "nrdp51-appboot.netflix.com",
-      "www.google.com",
-      "nflxso.net",
-      "data.microsoft.com",
-      "1.nflxso.net",
-      "ftl.netflix.com",
-      "facebook.com",
-      "customerevents.netflix.com",
-      "uiboot.netflix.com",
-      "settings-win.data.microsoft.com",
-      "prod.ftl.netflix.com",
-      "nccp.netflix.com",
-      "www.bbc.co.uk", // Note: registration date is in unexpected format
-      "mx4.mk.de", // can't find a DNS for this anywhere
-      "95a49f09385f5fb73aa3d1e994314a45b8d51f17.com" // first alphabetically ordered DNS to resolve is whois.aitdomains.com
-    )
+    val domains = Source.fromFile(args(0)).getLines().toSeq
     Tld2DnsParser.readMappings.right.foreach { mappings =>
       val t2d           = sortByLongestTLD(mappings.toSeq)
       val tlds          = loadTLDs()
       val dates         = datesOf(domains, tlds, t2d, apacheWhois)
       val namesAndDates = domains.zip(dates)
-      namesAndDates.foreach(println)
+
+      def toString(x: Option[RecordData]): String = x.map { case (c, e) => c.toString }.getOrElse("-")
+      println(namesAndDates.map{ case (n, ds) => "%80s%40s".format(n, toString(ds)) }.mkString("\n"))
       println("# undefined: " + namesAndDates.count(_._2.isEmpty))
     }
   }
