@@ -18,39 +18,6 @@ class DomainNameRegistrySpec extends WordSpec with Matchers with MockitoSugar {
 
   import DomainNameRegistry._
 
-  "Calls to the client" should {
-    "be grouped" in new DomainNameRegistryFixture {
-      private val d2ns          = collection.mutable.Map[String, Seq[String]]()
-      private val fn:   WhoIsFn = { case (d, xs) =>
-        println(s"$d -> $xs")
-        d2ns(d) = xs
-        xs.map (_ => Some(mock[RecordData]))
-      }
-
-      private val dates = datesOf(domains, tlds, t2d, fn)
-
-      dates should have size domains.size
-
-      d2ns should have size 2
-      d2ns(dnsCom) should have size 2
-      d2ns(dnsUk) should have size 1
-    }
-  }
-
-  "domains" should {
-    "be grouped by DNS" in new DomainNameRegistryFixture{
-      val dns2Domains: Seq[DNS2Domains] = dnsToDomains(domains, t2d)
-
-      dns2Domains should have size 2
-
-      def assertKV(k: Option[String], v: Seq[String]): Unit =
-        dns2Domains.find(_._1 == k ).get shouldBe k -> v
-
-      assertKV(Some(dnsCom), Seq(xCom, yCom))
-      assertKV(Some(dnsUk), Seq(zCoUk))
-    }
-  }
-
   "An appropriate DNS" should {
     "be chosen for a domain name" in new DomainNameRegistryFixture {
       suitableDNSFor(xCom, t2d) shouldBe Some(dnsCom)
