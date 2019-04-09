@@ -20,10 +20,10 @@ object DomainNameRegistry {
   def log(x: String): Unit = println(s"${new Date}: $x")
 
   def main(args: Array[String]): Unit = {
-    val domains = Source.fromFile(args(0)).getLines().toSeq
     Tld2DnsParser.readMappings.right.foreach { mappings =>
       val t2d           = sortByLongestTLD(mappings.toSeq)
       val tlds          = loadTLDs()
+      val domains       = Source.fromFile(args(0)).getLines().map(clean(tlds, _)).toSet.toSeq.sorted
       val dates         = datesOf(domains, tlds, t2d, apacheWhoIs)
       val namesAndDates = domains.zip(dates)
 
