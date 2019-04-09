@@ -1,7 +1,6 @@
 package uk.co.odinconsultants.features.domain_ip.address
 
 import java.io.{BufferedReader, InputStreamReader}
-import java.net.InetAddress
 import java.util.Date
 
 import com.google.common.base.Optional
@@ -67,7 +66,7 @@ object DomainNameRegistry {
   } match {
     case Success(x) => x
     case Failure(x) =>
-      log(s"$dns failed with ${x.getMessage}")
+      log(s"$dns failed to find data for $domain error = ${x.getMessage}")
       None
   }
 
