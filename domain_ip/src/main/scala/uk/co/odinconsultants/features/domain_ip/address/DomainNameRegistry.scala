@@ -54,7 +54,7 @@ object DomainNameRegistry {
 
   def suitableDNSFor(domain: String, t2d: Seq[TLD2Domain]): Option[String] =
     t2d.view.find { case (t, _) =>
-      domain.endsWith(t)
+      domain.endsWith(s".$t")
     }.map(_._2)
 
   def apacheWhoIs(dns: String, domain: String): Option[RecordData] = Try {
