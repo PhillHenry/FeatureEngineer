@@ -70,14 +70,6 @@ class DomainNameRegistrySpec extends WordSpec with Matchers with MockitoSugar {
     }
   }
 
-  "An attempt to parse" should {
-    val badDomain = InternetDomainName.from("x")
-    val goodDNS   = "whois.networksolutions.com"
-    "yield none for bad domains" in {
-      attemptParse(badDomain, goodDNS) shouldBe None
-    }
-  }
-
   "Splitting URLs" should {
     val tld       = "co.uk"
     val hostname  = "bbc"

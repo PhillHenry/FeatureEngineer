@@ -67,7 +67,7 @@ object DomainNameRegistry {
   } match {
     case Success(x) => x
     case Failure(x) =>
-      println(s"$dns failed with ${x.getMessage}")
+      log(s"$dns failed with ${x.getMessage}")
       None
   }
 
@@ -121,22 +121,6 @@ object DomainNameRegistry {
   type RecordData = (Date, Option[Date])
 
   def toOption[T](x: Optional[T]): Option[T] = if (x.isPresent) Some(x.get) else None
-
-  def attemptParse(address: InternetDomainName, dnsName: String): Option[RecordData] = {
-    val result = Try {
-      val dns     = InetAddress.getByName(dnsName)
-      val parser  = new io.github.minorg.whoisclient.WhoisClient()
-      val record  = parser.getWhoisRecord(address, dns)
-      val parsed  = record.getParsed
-      toRecordData(parsed)
-    }
-    result match {
-      case Success(x) => x
-      case Failure(x) =>
-        log(x.getClass.getSimpleName + ": " + x.getMessage)
-        None
-    }
-  }
 
   def toRecordData(parsed: ParsedWhoisRecord): Option[RecordData] = {
     val date = toOption(parsed.getCreationDate) match {
