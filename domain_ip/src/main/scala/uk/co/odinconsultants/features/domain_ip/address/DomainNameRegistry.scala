@@ -49,9 +49,6 @@ object DomainNameRegistry {
       val t2d           = sortByLongestTLD(mappings.toSeq)
       val tlds          = loadTLDs()
       val dates         = datesOf(domains, tlds, t2d, apacheWhois)
-      val namesAndDates = domains.zip(dates)
-      namesAndDates.foreach(println)
-      println("# undefined: " + namesAndDates.count(_._2.isEmpty))
     }
   }
 
@@ -59,19 +56,21 @@ object DomainNameRegistry {
 
   type TLD2Domain = (String, String)
 
-  type WhoIsFn = (String, String) => Option[RecordData]
+  type WhoIsFn = (String, Seq[String]) => Seq[Option[RecordData]]
 
   def datesOf(domains:  Seq[String],
               tlds:     Seq[String],
               t2d:      Seq[TLD2Domain],
-              fn:       WhoIsFn): Seq[Option[RecordData]] =
-    domains.map { x =>
-      val maybeDNS = suitableDNSFor(x, t2d)
-      maybeDNS.flatMap { dns =>
-        val cleaned = clean(tlds, x)
+              fn:       WhoIsFn): Seq[Option[RecordData]] = {
+    val d2ns = dnsToDomains(domains, t2d)
+    d2ns.flatMap { case (maybeDNS, ns) =>
+      val cleaned = ns.map( x => clean(tlds, x) )
+      val maybeRecord = maybeDNS.map { dns =>
         fn(dns, cleaned)
       }
-    }
+      maybeRecord.toTraversable
+    }.flatten
+  }
 
   type DNS2Domains = (Option[String], Seq[String])
 
@@ -88,17 +87,19 @@ object DomainNameRegistry {
       domain.endsWith(t)
     }.map(_._2)
 
-  def apacheWhois(dns: String, domain: String): Option[RecordData] = Try {
+  def apacheWhois(dns: String, domains: Seq[String]): Seq[Option[RecordData]] = Try {
     val client  = whoIsConnection(dns)
-    val str     = client.query(domain)
-    val opt     = parse(dns, domain, str)
+    val results = domains.map { domain =>
+      val str     = client.query(domain)
+      parse(dns, domain, str)
+    }
     client.disconnect()
-    opt
+    results
   } match {
     case Success(x) => x
     case Failure(x) =>
       println(s"$dns failed with ${x.getMessage}")
-      None
+      Seq()
   }
 
   def parse(dns: String, x: String, str: String): Option[RecordData] = {

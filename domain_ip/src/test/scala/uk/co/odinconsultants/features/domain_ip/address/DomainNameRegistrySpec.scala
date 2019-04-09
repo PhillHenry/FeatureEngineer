@@ -5,12 +5,11 @@ import java.util.Date
 import com.google.common.base.Optional
 import io.github.minorg.whoisclient.ParsedWhoisRecord
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.mockito.Mockito._
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{Matchers, WordSpec}
 import org.thryft.native_.InternetDomainName
-import com.google.common.base.Optional
 
 import scala.util.Random
 
@@ -18,6 +17,25 @@ import scala.util.Random
 class DomainNameRegistrySpec extends WordSpec with Matchers with MockitoSugar {
 
   import DomainNameRegistry._
+
+  "Calls to the client" should {
+    "be grouped" in new DomainNameRegistryFixture {
+      private val d2ns          = collection.mutable.Map[String, Seq[String]]()
+      private val fn:   WhoIsFn = { case (d, xs) =>
+        println(s"$d -> $xs")
+        d2ns(d) = xs
+        xs.map (_ => Some(mock[RecordData]))
+      }
+
+      private val dates = datesOf(domains, tlds, t2d, fn)
+
+      dates should have size domains.size
+
+      d2ns should have size 2
+      d2ns(dnsCom) should have size 2
+      d2ns(dnsUk) should have size 1
+    }
+  }
 
   "domains" should {
     "be grouped by DNS" in new DomainNameRegistryFixture{
