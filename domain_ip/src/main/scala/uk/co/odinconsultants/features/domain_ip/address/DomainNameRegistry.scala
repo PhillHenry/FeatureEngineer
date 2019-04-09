@@ -51,7 +51,7 @@ object DomainNameRegistry {
       val dates         = datesOf(domains, tlds, t2d, apacheWhois)
       val namesAndDates = domains.zip(dates)
       namesAndDates.foreach(println)
-      println("# undefined: " + namesAndDates.count(_._2 == None))
+      println("# undefined: " + namesAndDates.count(_._2.isEmpty))
     }
   }
 
@@ -73,7 +73,17 @@ object DomainNameRegistry {
       }
     }
 
-  def suitableDNSFor(domain: String, t2d: Seq[(TLD2Domain)]): Option[String] =
+  type DNS2Domains = (Option[String], Seq[String])
+
+  def dnsToDomains(domains:  Seq[String],
+                   t2d:      Seq[TLD2Domain]): Seq[DNS2Domains] = {
+    val dns2Dom = domains map { d =>
+      suitableDNSFor(d, t2d) -> d
+    }
+    dns2Dom.groupBy(_._1).map { case (dns, ds) => dns -> ds.map(_._2) }.toSeq
+  }
+
+  def suitableDNSFor(domain: String, t2d: Seq[TLD2Domain]): Option[String] =
     t2d.view.find { case (t, _) =>
       domain.endsWith(t)
     }.map(_._2)
