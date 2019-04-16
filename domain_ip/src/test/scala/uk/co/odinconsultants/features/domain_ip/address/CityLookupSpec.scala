@@ -1,7 +1,10 @@
 package uk.co.odinconsultants.features.domain_ip.address
 
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.{Matchers, WordSpec}
 
+@RunWith(classOf[JUnitRunner])
 class CityLookupSpec extends WordSpec with Matchers {
 
   "217.44.226.69" should {

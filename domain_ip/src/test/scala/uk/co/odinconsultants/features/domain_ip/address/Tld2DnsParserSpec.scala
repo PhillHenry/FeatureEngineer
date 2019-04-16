@@ -1,7 +1,10 @@
 package uk.co.odinconsultants.features.domain_ip.address
 
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.{Matchers, WordSpec}
 
+@RunWith(classOf[JUnitRunner])
 class Tld2DnsParserSpec extends WordSpec with Matchers {
 
   import Tld2DnsParser._
