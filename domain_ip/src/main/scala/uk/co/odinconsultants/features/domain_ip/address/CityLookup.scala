@@ -15,7 +15,6 @@ object CityLookup {
 
     def fn: GeoLocation = {
       val json = reader.get(InetAddress.getByName(address))
-      println(json)
       val lat   = json.get("location").get("latitude").asText.toFloat
       val long  = json.get("location").get("longitude").asText.toFloat
       GeoLocation(lat, long)
