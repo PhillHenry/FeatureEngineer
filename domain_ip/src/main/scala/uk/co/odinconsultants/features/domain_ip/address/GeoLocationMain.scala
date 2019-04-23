@@ -4,11 +4,13 @@ import scala.io.Source
 
 object GeoLocationMain {
 
+  import Readers._
+
   def main(args: Array[String]): Unit = {
     val ipAddresses = Source.fromFile(args(0)).getLines()
     val format = "%11.6f"
     ipAddresses.foreach { ip =>
-      val country   = CountryLookup(ip)
+      val country   = CountryLookup(ip, reader)
       val location  = CityLookup(ip)
       println("%-20s%-5s%30s".format(ip,
         country.right.getOrElse(""),
