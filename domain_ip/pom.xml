@@ -86,6 +86,10 @@
                                     <pattern>com.fasterxml.jackson</pattern>
                                     <shadedPattern>com.shaded.fasterxml.jackson</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>com.google</pattern>
+                                    <shadedPattern>com.shaded.google</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>
