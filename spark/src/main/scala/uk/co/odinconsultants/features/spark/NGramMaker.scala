@@ -10,14 +10,18 @@ object NGramMaker {
     import words.sparkSession.implicits._
     val nGramFn = NGrams.NGram(n)
     val ngrams = words.rdd.flatMap(r => nGramFn(r.getString(0))).cache()
-    val counts = ngrams.map(_ -> 1).reduceByKey(_ + _).toDF("ngram", "count")
-    counts
+    ngrams.map(_ -> 1).reduceByKey(_ + _).toDF("ngram", "count")
   }
 
-  def toProbabilities(counts: DataFrame): Double = {
+  def toCounts(counts: DataFrame): Double = {
     import counts.sparkSession.implicits._
-    val total     = counts.agg(sum('count)).collect()(0).getLong(0).toDouble
-    total
+    counts.agg(sum('count)).collect()(0).getLong(0).toDouble
   }
+  def toProbabilities(counts: DataFrame): Map[String, Double] = {
+    import counts.sparkSession.implicits._
+    val total = toCounts(counts)
+    counts.map(r => r.getString(0) -> (r.getInt(1) / total)).collect().toMap
+  }
+
 
 }
