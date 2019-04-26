@@ -5,7 +5,12 @@ import java.net.InetAddress
 import com.maxmind.db.Reader
 import uk.co.odinconsultants.features.domain_ip.address.Lookup._
 
-object CountryLookup {
+object CountryLookup extends GeoTools {
+
+  def lookupCountry(ip: String): String = {
+    val either = CountryLookup.apply(ip, Readers.reader)
+    either.right.getOrElse(NoDataString)
+  }
 
   /**
     * Returns the ISO code of the country to which this maps.
