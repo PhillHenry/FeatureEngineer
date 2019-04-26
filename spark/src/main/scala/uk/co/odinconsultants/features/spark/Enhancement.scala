@@ -30,7 +30,7 @@ object Enhancement {
         .withColumn("lon", longUDF(col("destinationAddress")))
         .withColumn("country", countryUDF(col("destinationAddress")))
         .cache()
-      enhanced.createOrReplaceTempView("enhanced")
+      enhanced.createOrReplaceTempView(table)
       enhanced
     }.right.get
   }
