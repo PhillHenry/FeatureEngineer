@@ -7,6 +7,7 @@
     <modules>
         <module>general</module>
         <module>domain_ip</module>
+        <module>spark</module>
     </modules>
     <name>${project.artifactId}</name>
   <description>Build feature vectors from data</description>
