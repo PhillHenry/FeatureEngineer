@@ -7,7 +7,25 @@ import org.scalatest.{Matchers, WordSpec}
 @RunWith(classOf[JUnitRunner])
 class AddressesSpec extends WordSpec with Matchers {
 
+  val tlds: Set[String] = Set("com",
+    "googleapis.com",
+    "s3.amazonaws.com",
+    "goog",
+    "tv",
+    "elb.amazonaws.com",
+    "appspot.com")
+
   import Addresses._
+
+  "TLDs" should {
+    val sortedTLDs = longestToShortest(tlds)
+    "be sorted longest first" in {
+      sortedTLDs shouldBe List("tv", "com", "goog", "appspot.com", "googleapis.com", "s3.amazonaws.com", "elb.amazonaws.com").reverse
+    }
+    "be stripped" in {
+      removeTLD(sortedTLDs, s"x.y.z.${tlds.head}") shouldBe "z"
+    }
+  }
 
   "hostname with port" should {
     val x = "bbc.co.uk"
