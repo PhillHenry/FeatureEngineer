@@ -22,8 +22,9 @@ object DomainNameRegistry {
     Tld2DnsParser.readMappings.right.foreach { mappings =>
       val t2d           = sortByLongestTLD(mappings.toSeq)
       val tlds          = loadTLDs()
-      val domains       = Source.fromFile(args(0)).getLines().map(clean(tlds, _)).toSet.toSeq.sorted
-      val dates         = datesOf(domains, tlds, t2d, apacheWhoIs)
+      val orderedTLDs   = longestToShortest(tlds)
+      val domains       = Source.fromFile(args(0)).getLines().map(clean(orderedTLDs, _)).toSet.toSeq.sorted
+      val dates         = datesOf(domains, orderedTLDs, t2d, apacheWhoIs)
       val namesAndDates = domains.zip(dates)
 
       def toString(x: Option[RecordData]): String = x.map { case (c, e) => c.toString }.getOrElse("-")
@@ -85,7 +86,7 @@ object DomainNameRegistry {
     client
   }
 
-  def loadTLDs(): Seq[String] = {
+  def loadTLDs(): Set[String] = {
     val stream  = DomainNameRegistry.getClass.getClassLoader.getResourceAsStream("top-1m-TLD.csv")
     val buffer  = new BufferedReader(new InputStreamReader(stream))
     val output  = new ArrayBuffer[String]()
@@ -94,18 +95,17 @@ object DomainNameRegistry {
       output += line.substring(line.indexOf(",") + 1)
       line    = buffer.readLine()
     }
-    output
+    output.toSet
   }
 
   def clean(tlds: Seq[String], domain: String): String = {
     val (name, tld) = splitTLDs(domain, tlds.toSet)
-    val lastDot = name.lastIndexOf(".")
-    val hostname = if (lastDot == -1) name else name.substring(lastDot + 1)
+    val lastDot     = name.lastIndexOf(".")
+    val hostname    = if (lastDot == -1) name else name.substring(lastDot + 1)
     s"$hostname.$tld"
   }
 
-  def splitTLDs(domain: String, tlds: Set[String]): (String, String) = {
-    val orderedTLDs = longestToShortest(tlds)
+  def splitTLDs(domain: String, orderedTLDs: Set[String]): (String, String) = {
     val tld         = orderedTLDs.find(x => domain.endsWith(s".$x"))
     tld match {
       case Some(t)  =>

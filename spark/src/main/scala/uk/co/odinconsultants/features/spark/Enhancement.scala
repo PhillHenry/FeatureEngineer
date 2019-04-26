@@ -9,11 +9,12 @@ import org.apache.spark.sql.DataFrame
 
 object Enhancement {
 
-  def enhanceAndRegister(df: DataFrame, tlds: Seq[String], table: String): Unit = Tld2DnsParser.readMappings.right.foreach { mappings =>
+  def enhanceAndRegister(df: DataFrame, tlds: Set[String], table: String): Unit = Tld2DnsParser.readMappings.right.foreach { mappings =>
     val t2d           = sortByLongestTLD(mappings.toSeq)
+    val orderedTLDs   = longestToShortest(tlds)
 
     def toWhois(x: String): String = {
-      val domain = clean(tlds, x)
+      val domain = clean(orderedTLDs, x)
       suitableDNSFor(domain, t2d).flatMap(dns => apacheWhoIs(dns, domain).map(_._1)).getOrElse("-").toString
     }
 
@@ -28,7 +29,7 @@ object Enhancement {
       .withColumn("lon",     longUDF(col("destinationAddress")))
       .withColumn("country", countryUDF(col("destinationAddress")))
       .cache()
-      .registerTempTable("enhanced")
+      .createOrReplaceTempView("enhanced")
   }
 
 }
