@@ -17,10 +17,12 @@ object NGramMaker {
     import counts.sparkSession.implicits._
     counts.agg(sum('count)).collect()(0).getLong(0).toDouble
   }
-  def toProbabilities(counts: DataFrame): Map[String, Double] = {
-    import counts.sparkSession.implicits._
-    val total = toCounts(counts)
-    counts.map(r => r.getString(0) -> (r.getInt(1) / total)).collect().toMap
+
+  def toProbabilities(df: DataFrame, n: Int): Map[String, Double] = {
+    import df.sparkSession.implicits._
+    val histo = toHistogram(df, n)
+    val total = toCounts(histo)
+    histo.map(r => r.getString(0) -> (r.getInt(1) / total)).collect().toMap
   }
 
 
