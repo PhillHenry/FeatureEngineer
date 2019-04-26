@@ -18,6 +18,12 @@ object Addresses {
     }
   }
 
+  def toDomainName(orderedTLDs: Seq[String], x: String): String = {
+    val cleaned = removePorts(removeTLD(orderedTLDs, x))
+    val last = cleaned.lastIndexOf(".")
+    if (last == -1) cleaned else cleaned.substring(last + 1)
+  }
+
   def removeTLD(orderedTLDs: Seq[String], domain: String): String = {
     val tld = orderedTLDs.find(x => domain.endsWith(s".$x"))
     tld match {
