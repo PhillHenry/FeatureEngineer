@@ -14,9 +14,16 @@ object Enhancement {
       val t2d = sortByLongestTLD(mappings.toSeq)
       val orderedTLDs = longestToShortest(tlds)
 
+      import scala.collection.convert.decorateAsScala._
+      val x2Whois = new java.util.concurrent.ConcurrentHashMap[String, String]().asScala
+
       def toWhois(x: String): String = {
-        val domain = clean(orderedTLDs, x)
-        suitableDNSFor(domain, t2d).flatMap(dns => apacheWhoIs(dns, domain).map(_._1)).getOrElse("-").toString
+        x2Whois.getOrElse(x, {
+          val domain  = clean(orderedTLDs, x)
+          val whois   = suitableDNSFor(domain, t2d).flatMap(dns => apacheWhoIs(dns, domain).map(_._1)).getOrElse("-").toString
+          x2Whois(x) = whois
+          whois
+        })
       }
 
       val toWhoisUDF = udf(toWhois _)
