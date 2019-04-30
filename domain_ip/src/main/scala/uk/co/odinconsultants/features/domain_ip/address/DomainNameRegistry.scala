@@ -83,6 +83,7 @@ object DomainNameRegistry {
     client.setConnectTimeout(5000)
     client.setDefaultTimeout(5000)
     client.connect(dns)
+    client.setSoTimeout(5000)
     client
   }
 
