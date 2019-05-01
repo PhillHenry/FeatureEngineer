@@ -10,8 +10,6 @@ import java.sql.Timestamp
 
 object Enhancement {
 
-  val NoDate: Timestamp = new Timestamp(Long.MaxValue)
-
   def toMaybeDate(dns: String, domain: String): Option[Timestamp] =
     apacheWhoIs(dns, domain).map(_._1).map(x => new Timestamp(x.getTime))
 
@@ -21,15 +19,17 @@ object Enhancement {
       val orderedTLDs = longestToShortest(tlds)
 
       import scala.collection.convert.decorateAsScala._
-      val x2Whois = new java.util.concurrent.ConcurrentHashMap[String, Timestamp]().asScala
+      val x2Whois = new java.util.concurrent.ConcurrentHashMap[String, Option[Timestamp]]().asScala
+
+      def whoisAndCache(x: String): Option[Timestamp] = {
+        val domain    = clean(orderedTLDs, x)
+        val maybeDate = suitableDNSFor(domain, t2d).flatMap(dns => toMaybeDate(dns, domain))
+        x2Whois(x)    = maybeDate
+        maybeDate
+      }
 
       def toWhois(x: String): Timestamp = {
-        x2Whois.getOrElse(x, {
-          val domain  = clean(orderedTLDs, x)
-          val whois   = suitableDNSFor(domain, t2d).flatMap(dns => toMaybeDate(dns, domain)).getOrElse(NoDate)
-          x2Whois(x) = whois
-          whois
-        })
+        x2Whois.getOrElse(x, whoisAndCache(x)).getOrElse(null)
       }
 
       val toWhoisUDF  = udf(toWhois _)
