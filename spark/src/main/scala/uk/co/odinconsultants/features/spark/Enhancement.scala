@@ -1,12 +1,14 @@
 package uk.co.odinconsultants.features.spark
 
-import uk.co.odinconsultants.features.domain_ip.address.Tld2DnsParser
-import org.apache.spark.sql.functions.{udf, col}
+import uk.co.odinconsultants.features.domain_ip.address.{HttpChecker, Tld2DnsParser}
+import org.apache.spark.sql.functions.{col, udf}
 import uk.co.odinconsultants.features.domain_ip.address.DomainNameRegistry._
 import uk.co.odinconsultants.features.domain_ip.address.CityLookup._
 import uk.co.odinconsultants.features.domain_ip.address.CountryLookup._
 import org.apache.spark.sql.DataFrame
 import java.sql.Timestamp
+
+import uk.co.odinconsultants.features.domain_ip.address.HttpChecker.httpCodeOf
 
 object Enhancement {
 
@@ -22,12 +24,14 @@ object Enhancement {
       val latUDF      = udf(latitude _)
       val longUDF     = udf(longitude _)
       val countryUDF  = udf(lookupCountry _)
+      val httpCodeUDF = udf[Int, String, Int](httpCodeOf(_, _))
 
       val enhanced = df
         .withColumn("whois",    toWhoisUDF(col("destinationHostName")))
         .withColumn("lat",      latUDF(col("destinationAddress")))
         .withColumn("lon",      longUDF(col("destinationAddress")))
         .withColumn("country",  countryUDF(col("destinationAddress")))
+        .withColumn("httpCode", httpCodeUDF(col("destinationHostName"), col("destinationPort")))
         .cache()
       enhanced.createOrReplaceTempView(table)
       enhanced
