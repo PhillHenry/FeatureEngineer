@@ -34,6 +34,7 @@ object HttpChecker {
       val url = new URL(httpURL)
       val con = url.openConnection().asInstanceOf[HttpURLConnection]
       con.setConnectTimeout(5000)
+      con.setReadTimeout(5000)
       con.getResponseCode
     } match {
       case Success(x) => x
