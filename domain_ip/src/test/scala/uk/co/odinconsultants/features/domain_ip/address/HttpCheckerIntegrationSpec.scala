@@ -10,8 +10,12 @@ class HttpCheckerIntegrationSpec extends WordSpec with Matchers {
   import HttpChecker._
 
   "BBC" should {
+    val bbc = "bbc.co.uk"
     "be HTTP 200" in {
-      httpCodeCalling("https://bbc.co.uk/news") shouldBe 200
+      httpsCodeOf("https://" + bbc + "/") shouldBe 200
+    }
+    "Redirect you to a secure connection " in {
+      httpCodeOf(bbc, 80) shouldBe 301
     }
   }
 

@@ -12,14 +12,17 @@ class HttpCheckerSpec extends WordSpec with Matchers {
   val host = "bbc.co.uk"
 
   "A URL" should {
-    s"have $protocol added if it has none" in {
-      clean(host) shouldBe s"${protocol}$host"
+    s"have $https added if it has none" in {
+      ensureHttps(host) shouldBe s"${https}$host"
     }
-    s"be left alone if it begins with $protocol" in {
-      clean(s"${protocol}$host") shouldBe s"${protocol}$host"
+    s"be left alone if it begins with $https" in {
+      ensureHttps(s"${https}$host") shouldBe s"${https}$host"
     }
     s"be upgraded to HTTPS if it's only HTTP" in {
-      clean(s"http://$host") shouldBe s"${protocol}$host"
+      ensureHttps(s"http://$host") shouldBe s"${https}$host"
+    }
+    "be http only if the port is 80" in {
+      clean(host, 80) shouldBe s"${http}$host"
     }
   }
 
