@@ -2,6 +2,8 @@ package uk.co.odinconsultants.features.domain_ip.address
 
 import java.net.{HttpURLConnection, URL}
 
+import scala.util.{Success, Try}
+
 object HttpChecker {
 
   val https = "https://"
@@ -28,9 +30,16 @@ object HttpChecker {
     httpCodeCalling(ensureHttps(x))
 
   def httpCodeCalling(httpURL: String): Int = {
-    val url = new URL(httpURL)
-    val con = url.openConnection().asInstanceOf[HttpURLConnection]
-    con.getResponseCode
+    Try {
+      val url = new URL(httpURL)
+      val con = url.openConnection().asInstanceOf[HttpURLConnection]
+      con.setConnectTimeout(5000)
+      con.getResponseCode
+    } match {
+      case Success(x) => x
+      case _          => -1
+    }
+
   }
 
 }

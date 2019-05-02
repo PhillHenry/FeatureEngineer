@@ -19,4 +19,17 @@ class HttpCheckerIntegrationSpec extends WordSpec with Matchers {
     }
   }
 
+  "A URL that doesn't respond" should {
+    "be handled gracefully" in {
+      httpsCodeOf("cloudfunctions.net") shouldBe -1
+    }
+  }
+
+  "An unknown URL" should {
+    "be handled gracefully" in {
+      httpsCodeOf("njksdhgfisdhgs.net") shouldBe -1
+    }
+  }
+
+
 }
