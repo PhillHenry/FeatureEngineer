@@ -23,8 +23,6 @@ object Enhancement {
 
   def enhanceAndRegister(df: DataFrame, tlds: Set[String], table: String): DataFrame = {
     Tld2DnsParser.readMappings.right.map { mappings =>
-      implicit val ec = ExecutionContext.global
-
       val timeoutMs   = 4000
       val t2d         = sortByLongestTLD(mappings.toSeq)
       val orderedTLDs = longestToShortest(tlds)
@@ -51,8 +49,10 @@ object Enhancement {
     }.right.get
   }
 
-  def stopMe[T](f: => T, timeout: Long)(implicit ec: ExecutionContext): T = {
+  def stopMe[T](f: => T, timeout: Long): T = {
     import scala.collection.JavaConversions._
+
+    implicit val ec = ExecutionContext.global
 
     val threads = Collections.newSetFromMap[Thread](new ConcurrentHashMap[Thread, Boolean]().asInstanceOf[java.util.Map[Thread, java.lang.Boolean]])
     threads.add(currentThread())

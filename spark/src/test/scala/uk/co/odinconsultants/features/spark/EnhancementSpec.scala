@@ -2,11 +2,7 @@ package uk.co.odinconsultants.features.spark
 
 import org.scalatest.{Matchers, WordSpec}
 
-import scala.concurrent.ExecutionContext
-
 class EnhancementSpec extends WordSpec with Matchers {
-
-  implicit val ec = ExecutionContext.global
 
   import Enhancement._
 
