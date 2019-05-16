@@ -17,6 +17,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>uk.co.odinconsultants.features</groupId>
+            <artifactId>general</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.elasticsearch</groupId>
             <artifactId>geolite2-databases</artifactId>
             <version>20180911</version>

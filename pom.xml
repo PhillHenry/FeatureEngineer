@@ -67,6 +67,11 @@
       <artifactId>scala-library</artifactId>
       <version>${scala.version}</version>
     </dependency>
+    <dependency>
+      <groupId>uk.co.odinconsultants</groupId>
+      <artifactId>smaths</artifactId>
+      <version>1.0</version>
+    </dependency>
   </dependencies>
 
   <build>
