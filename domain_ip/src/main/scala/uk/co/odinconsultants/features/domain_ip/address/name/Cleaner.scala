@@ -16,7 +16,7 @@ object Cleaner {
 
   val csv2Mappings: String => Seq[(String, Char)] = { line =>
     val xs    = csv2Unicode(line)
-    val aOpt  = xs.find(asciiUnicde.contains)
+    val aOpt  = xs.reverse.find(asciiUnicde.contains)
     mappings(aOpt, xs)
   }
 
