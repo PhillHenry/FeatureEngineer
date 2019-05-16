@@ -1,6 +1,7 @@
 package uk.co.odinconsultants.features.domain_ip.address.name
 
 import Comparison._
+import Cleaner._
 
 trait VodafoneFixture extends PunyCode {
 

@@ -30,14 +30,8 @@ object Comparison extends PunyCode {
   val correction = 1e-8
   val Comparison: CompareFn =  { case (x, y) => kl(x + correction, y + correction) }
 
-  def clean(x: String): String = {
-    val ascii = if (x.startsWith("xn--")) java.net.IDN.toUnicode(x) else x
-    println(s"x = $x, ascii = $ascii")
-    ascii.replaceAll(A, "a").replaceAll(O, "o").replaceAll(F, "f").replaceAll(E, "e").toLowerCase
-  }
-
   def compare(baseline: Probabilities, x: String, ns: Set[Int]): Double = {
-    val domain    = clean(x)
+    val domain    = Cleaner.clean(x)
     val ps        = probabilitiesWBlanks(ns, domain)
     val (xs, ys)  = maps2Arrays(baseline, ps)
     total(Comparison, xs.toArray, ys.toArray) + math.abs(ps.size - baseline.size)
