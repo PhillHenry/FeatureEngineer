@@ -28,6 +28,9 @@ object Cleaner {
 
   val x2Ascii: Map[String, Char] = Reading.fromClasspath("char_codes.txt").flatMap (csv2Mappings).toMap
 
+  /**
+    * TODO: this should really return Set[String] as there are potentially more than one possible mappings.
+    */
   def toSimilarAscii(xs: String): String =
     xs.map { x =>
       x2Ascii.getOrElse(x.toString, x)
