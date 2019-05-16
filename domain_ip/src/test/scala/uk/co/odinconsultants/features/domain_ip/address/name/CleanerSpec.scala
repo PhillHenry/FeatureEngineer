@@ -21,6 +21,12 @@ class CleanerSpec extends WordSpec with Matchers {
     }
   }
 
+  "Entirely ascii domain names" should {
+    "not be changed" in new VodafoneFixture {
+      clean(vodafone) shouldBe vodafone
+    }
+  }
+
   "Non-ascii characters" should {
     "map to ascii" in new VodafoneFixture {
       similar foreach { w =>

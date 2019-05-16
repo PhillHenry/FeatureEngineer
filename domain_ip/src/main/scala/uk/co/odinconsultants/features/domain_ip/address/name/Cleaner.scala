@@ -1,6 +1,5 @@
 package uk.co.odinconsultants.features.domain_ip.address.name
 
-import uk.co.odinconsultants.features.domain_ip.address.name.Comparison.{A, E, F, O}
 import uk.co.odinconsultants.features.domain_ip.util.Reading
 
 object Cleaner {
@@ -23,7 +22,7 @@ object Cleaner {
 
   def mappings(aOpt: Option[String], xs: Seq[String]): Seq[(String, Char)] =
     aOpt.map { a =>
-      xs.filterNot(_ == a).map(_ -> unicode2Ascii(a))
+      xs.filterNot(_ == a).filterNot(asciiUnicde.contains(_)).map(_ -> unicode2Ascii(a))
     }.toList.flatten
 
   val x2Ascii: Map[String, Char] = Reading.fromClasspath("char_codes.txt").flatMap (csv2Mappings).toMap
