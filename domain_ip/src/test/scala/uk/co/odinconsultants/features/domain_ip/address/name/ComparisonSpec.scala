@@ -107,7 +107,7 @@ class ComparisonSpec extends WordSpec with Matchers with VodafoneFixture {
 
       println(s"\nvoda = $voda, icpavone = $rand")
 
-      withClue(s"icpavone = ${rand} vOdAFOnE = ${voda}\nvodafone = ${baseline.keySet}\nvOdAFOnE = ${ps_vOdAFOnE.keySet}\n") {
+      withClue(s"icpavone = $rand vOdAFOnE = $voda\nvodafone = ${baseline.keySet}\nvOdAFOnE = ${ps_vOdAFOnE.keySet}\ncleaned = ${Cleaner.clean(vOdAFOnE)}\n") {
         voda.size should be > rand.size
       }
     }
