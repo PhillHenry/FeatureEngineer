@@ -9,6 +9,7 @@ import io.github.minorg.whoisclient.parser.WhoisRecordParser
 import io.github.minorg.whoisclient.{ParsedWhoisRecord, RawWhoisRecord}
 import org.apache.commons.net.whois.WhoisClient
 import org.thryft.native_.InternetDomainName
+import uk.co.odinconsultants.features.domain_ip.util.Reading
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
@@ -87,17 +88,10 @@ object DomainNameRegistry {
     client
   }
 
-  def loadTLDs(): Set[String] = {
-    val stream  = DomainNameRegistry.getClass.getClassLoader.getResourceAsStream("top-1m-TLD.csv")
-    val buffer  = new BufferedReader(new InputStreamReader(stream))
-    val output  = new ArrayBuffer[String]()
-    var line    = buffer.readLine()
-    while (line != null) {
-      output += line.substring(line.indexOf(",") + 1)
-      line    = buffer.readLine()
-    }
-    output.toSet
-  }
+  def loadTLDs(): Set[String] =
+    Reading.fromClasspath("top-1m-TLD.csv").map { line =>
+      line.substring(line.indexOf(",") + 1)
+    }.toSet
 
   def clean(tlds: Seq[String], domain: String): String = {
     val (name, tld) = splitTLDs(domain, tlds.toSet)
