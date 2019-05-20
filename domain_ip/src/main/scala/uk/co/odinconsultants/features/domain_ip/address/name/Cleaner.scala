@@ -35,8 +35,10 @@ object Cleaner {
       x2Ascii.getOrElse(x.toString, x)
     }
 
+  def toAscii(x: String): String = if (x.startsWith("xn--")) java.net.IDN.toUnicode(x) else x
+
   def clean(x: String): String = {
-    val ascii = if (x.startsWith("xn--")) java.net.IDN.toUnicode(x) else x
+    val ascii = toAscii(x)
     toSimilarAscii(ascii).toLowerCase
   }
 
