@@ -17,9 +17,9 @@ object HistogramBuilder {
     }.toMap
   }
 
-  def toProbabilities(histo: Map[String, Int]): Map[String, Double] = {
-    val N = histo.values.sum
-    histo.map { case (k, v) => (k, v.toDouble / N) }
+  def toProbabilities[T](histo: Map[T, Int]): Map[T, Double] = {
+    val sum = histo.values.sum
+    histo.map { case (k, v) => (k, v.toDouble / sum) }
   }
 
 
