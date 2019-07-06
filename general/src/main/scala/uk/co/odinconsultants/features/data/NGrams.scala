@@ -5,9 +5,9 @@ object NGrams {
   type NGramFn = String => Seq[String]
 
   val CharUnigrams: NGramFn = _.split("")
-  val Unigrams:     NGramFn = NGrams.ngramsOf(1, _)
-  val Bigrams:      NGramFn = NGrams.ngramsOf(2, _)
-  val Trigrams:     NGramFn = NGrams.ngramsOf(3, _)
+  val Unigrams:     NGramFn = ngramsOf(1, _)
+  val Bigrams:      NGramFn = ngramsOf(2, _)
+  val Trigrams:     NGramFn = ngramsOf(3, _)
 
   val NGram: Map[Int, NGramFn] = Map(1 -> Unigrams, 2 -> Bigrams, 3 -> Trigrams)
 
